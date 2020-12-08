@@ -1,7 +1,10 @@
+options(tidyverse.quiet = TRUE)
+
 library(tidyverse)
 library(RcppRoll)
-library(magrittr)
-library(janitor)
+library(magrittr, warn.conflicts = FALSE)
+library(janitor, warn.conflicts = FALSE)
+library(glue, warn.conflicts = FALSE)
 
 pop_data <- read_csv(
   'data/population_data.csv',
@@ -33,7 +36,7 @@ data <- read_csv(
   )
 ) %>% clean_names()
 
-data %<>% left_join(pop_data)
+data %<>% left_join(pop_data, by = 'fips')
 
 DISTRICTS = c('Thomas Jefferson', 'Fairfax', 'Virginia Beach')
 
@@ -55,7 +58,8 @@ fig <- fig_data %>%
   geom_line() + 
   scale_color_brewer('Health District', palette = 'Set1') + 
   labs(x = "Lab Report Date",
-       y = "Cases/100,000 population")
+       y = "Cases/100,000 population",
+       title = glue("VA COVID Data as of {Sys.time()}"))
 
 if (file.exists("/output")) {
   ggsave("/output/output.pdf", fig, width = 11, height = 8.5)
