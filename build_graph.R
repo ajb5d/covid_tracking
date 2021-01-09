@@ -38,7 +38,11 @@ data <- read_csv(
 
 data %<>% left_join(pop_data, by = 'fips')
 
-DISTRICTS = c('Thomas Jefferson', 'Fairfax', 'Virginia Beach')
+data %<>%
+  mutate(vdh_health_district = case_when(vdh_health_district == "Thomas Jefferson" ~ "Blue Ridge",
+                                         TRUE ~ vdh_health_district))
+
+DISTRICTS = c('Blue Ridge', 'Fairfax', 'Virginia Beach')
 
 fig_data <- data %>%
   filter(vdh_health_district %in% DISTRICTS) %>%
