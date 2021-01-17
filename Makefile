@@ -1,4 +1,4 @@
 all:
-	docker build . -t build_graph
-	docker run -v `pwd`:/output build_graph	
+	docker build . -t covid_graph
+	docker run -v `pwd`:/output --rm covid_graph	
 

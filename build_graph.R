@@ -89,4 +89,4 @@ fig2 <- tm_shape(county_shapes) +
 pdf("/output/output.pdf", width = 11, height = 8.5)
 print(fig1)
 print(fig2)
-ignore <- dev.off()
+invisible(dev.off())

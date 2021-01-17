@@ -4,6 +4,7 @@ RUN install2.r janitor RcppRoll
 
 WORKDIR /app
 
-COPY . .
+COPY data data
+COPY *.R  .
 
 CMD ["/usr/local/bin/Rscript", "build_graph.R"] 
