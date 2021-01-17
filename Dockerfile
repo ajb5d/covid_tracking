@@ -1,6 +1,4 @@
-FROM rocker/tidyverse:4.0.3
-
-RUN /rocker_scripts/install_tidyverse.sh
+FROM rocker/geospatial:4.0.3
 
 RUN install2.r janitor RcppRoll
 
