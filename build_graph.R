@@ -86,7 +86,56 @@ county_shapes %<>% left_join(current_data, by = 'fips')
 fig2 <- tm_shape(county_shapes) + 
   tm_polygons("recent_rate", breaks = c(0,10,20,30,40,50,60,70,80,90,100,200,300,10000))
 
+
+URL <- "https://data.virginia.gov/api/views/3u5k-c2gr/rows.csv?accessType=DOWNLOAD"
+data <- read_csv(URL, col_types = cols(
+  `Lab Report Date` = col_character(),
+  `Health District` = col_character(),
+  `Number of PCR Testing Encounters` = col_double(),
+  `Number of Positive PCR Testing Encounters` = col_double(),
+  `Number of Antigen Testing Encounters` = col_double(),
+  `Number of Positive Antigen Testing Encounters` = col_double(),
+  `Number of Antibody Testing Encounters` = col_double(),
+  `Number of Positive Antibody Testing Encounters` = col_double(),
+  `Total Number of Testing Encounters` = col_double(),
+  `Total Number of Positive Testing Encounters` = col_double()
+)) %>% clean_names()
+
+data %<>%
+  mutate(vdh_health_district = case_when(health_district == "Thomas Jefferson" ~ "Blue Ridge",
+                                         TRUE ~ health_district), 
+         lab_report_date = na_if(lab_report_date, "Not Reported"),
+         lab_report_date = parse_date(lab_report_date, format = "%m/%d/%Y"))
+
+MAX_DATE = max(data$lab_report_date, na.rm=TRUE)
+data %<>%
+  filter(lab_report_date >= MAX_DATE - ddays(7)) %>%
+  select(-lab_report_date) %>%
+  group_by(health_district) %>%
+  summarise(across(starts_with("number"), ~ sum(.x, na.rm = TRUE)), .groups = 'drop')
+
+
+
+hd_maps <- read_sf("data/vdh_health_districts/geo_export_ede290cb-5737-433c-89a8-963e9f314650.shp")
+
+hd_maps %<>%
+  rename(health_district = vdh_hd) %>%
+  mutate(health_district = case_when(health_district == "Thomas Jefferson" ~ "Blue Ridge",
+                                     health_district == "Rappahannock/Rapidan" ~ "Rappahannock Rapidan",
+                                     health_district == "Roanoke City" ~ "Roanoke",
+                                     health_district == "Rappahannock Area" ~ "Rappahannock",
+                                     health_district == "Pittsylvania/Danville" ~ "Pittsylvania-Danville",
+                                         TRUE ~ health_district)) %>%
+  left_join(data, by = "health_district")
+
+hd_maps %<>%
+  mutate(frac = number_of_positive_pcr_testing_encounters / number_of_pcr_testing_encounters)
+  
+fig3 <- tm_shape(hd_maps) + 
+  tm_polygons("frac", breaks = c(0,0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 1))
+
 pdf("/output/output.pdf", width = 11, height = 8.5)
 print(fig1)
 print(fig2)
+print(fig3)
 invisible(dev.off())
