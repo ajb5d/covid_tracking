@@ -84,7 +84,9 @@ county_shapes <- read_sf("data/cb_2018_us_county_20m/cb_2018_us_county_20m.shp")
 
 county_shapes %<>% left_join(current_data, by = 'fips')
 fig2 <- tm_shape(county_shapes) + 
-  tm_polygons("recent_rate", breaks = c(0,10,20,30,40,50,60,70,80,90,100,200,300,10000))
+  tm_polygons("recent_rate",
+              breaks = c(0,10,20,30,40,50,60,70,80,90,100,200,300,10000),
+              title = "7d average of Cases / 100k / Day ")
 
 
 URL <- "https://data.virginia.gov/api/views/3u5k-c2gr/rows.csv?accessType=DOWNLOAD"
@@ -132,7 +134,7 @@ hd_maps %<>%
   mutate(frac = number_of_positive_pcr_testing_encounters / number_of_pcr_testing_encounters)
   
 fig3 <- tm_shape(hd_maps) + 
-  tm_polygons("frac", breaks = c(0,0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 1))
+  tm_polygons("frac", breaks = c(0,0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 1), title = "7-day % PCR Positivity Rate")
 
 pdf("/output/output.pdf", width = 11, height = 8.5)
 print(fig1)
