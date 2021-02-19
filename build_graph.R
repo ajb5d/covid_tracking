@@ -107,7 +107,7 @@ data %<>%
   mutate(vdh_health_district = case_when(health_district == "Thomas Jefferson" ~ "Blue Ridge",
                                          TRUE ~ health_district), 
          lab_report_date = na_if(lab_report_date, "Not Reported"),
-         lab_report_date = parse_date(lab_report_date, format = "%m/%d/%Y"))
+         lab_report_date = parse_date(lab_report_date))
 
 MAX_DATE = max(data$lab_report_date, na.rm=TRUE)
 data %<>%
