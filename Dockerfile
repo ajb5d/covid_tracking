@@ -8,6 +8,6 @@ EXPOSE 8080
 WORKDIR /app
 
 COPY data data
-COPY *.R  .
+COPY *.R  ./
 
 ENTRYPOINT ["Rscript", "-e", "plumber::plumb('api.R')$run(host='0.0.0.0', port=as.numeric(Sys.getenv('PORT')))"]
