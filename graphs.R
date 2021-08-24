@@ -20,11 +20,11 @@ build_graphs <- function() {
       CTYNAME = col_character()
     )
   )
-  
+
   pop_data %<>%
     transmute(fips = str_c(STATE, COUNTY),
               population = POPESTIMATE2019 / 100000)
-  
+
   URL <- 'https://data.virginia.gov/api/views/bre9-aqqr/rows.csv?accessType=DOWNLOAD'
   data <- read_csv(
     URL,
@@ -38,15 +38,15 @@ build_graphs <- function() {
       Deaths = col_double()
     )
   ) %>% clean_names()
-  
-  data %<>% left_join(pop_data, by = 'fips')
-  
+
+  data <- data %>% left_join(pop_data, by = 'fips')
+
   hd_data <- data %>%
     mutate(vdh_health_district = case_when(vdh_health_district == "Thomas Jefferson" ~ "Blue Ridge",
                                            TRUE ~ vdh_health_district))
-  
+
   DISTRICTS = c('Blue Ridge', 'Fairfax', 'Virginia Beach')
-  
+
   fig_data <- hd_data %>%
     filter(vdh_health_district %in% DISTRICTS) %>%
     group_by(vdh_health_district, report_date) %>%
@@ -104,7 +104,7 @@ build_graphs <- function() {
   )) %>% clean_names()
   
   data %<>%
-    mutate(vdh_health_district = case_when(health_district == "Thomas Jefferson" ~ "Blue Ridge",
+    mutate(health_district = case_when(health_district == "Thomas Jefferson" ~ "Blue Ridge",
                                            TRUE ~ health_district), 
            lab_report_date = na_if(lab_report_date, "Not Reported"),
            lab_report_date = parse_date(lab_report_date, format = "%m/%d/%Y"))
