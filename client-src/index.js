@@ -1,98 +1,79 @@
 'use strict';
-
-import {
-  Chart,
-  ArcElement,
-  LineElement,
-  BarElement,
-  PointElement,
-  BarController,
-  BubbleController,
-  DoughnutController,
-  LineController,
-  PieController,
-  PolarAreaController,
-  RadarController,
-  ScatterController,
-  CategoryScale,
-  LinearScale,
-  LogarithmicScale,
-  RadialLinearScale,
-  TimeScale,
-  TimeSeriesScale,
-  Decimation,
-  Filler,
-  Legend,
-  Title,
-  Tooltip,
-  SubTitle
-} from 'chart.js';
-
-Chart.register(
-  ArcElement,
-  LineElement,
-  BarElement,
-  PointElement,
-  BarController,
-  BubbleController,
-  DoughnutController,
-  LineController,
-  PieController,
-  PolarAreaController,
-  RadarController,
-  ScatterController,
-  CategoryScale,
-  LinearScale,
-  LogarithmicScale,
-  RadialLinearScale,
-  TimeScale,
-  TimeSeriesScale,
-  Decimation,
-  Filler,
-  Legend,
-  Title,
-  Tooltip,
-  SubTitle
-);
-
-import 'chartjs-adapter-date-fns';
 import _ from 'lodash';
 import * as d3 from "d3";
 import data from '../data/output.json';
 window.dat = data;
 
-function component() {
-    var ctx = "myChart";
-    const dataset = data;
-    const health_districts = ["Blue Ridge", "Central Shenandoah", "Virginia Beach"];//_.uniq(dataset.map(s => s.vdh_health_district))
-    const pal = d3.schemeTableau10;
+function drawFigure() {
+  const dataset = data;
+  const width = 600;
+  const height = 400;
+  const margin = {
+    left: 30,
+    right: 10,
+    top: 10,
+    bottom: 30,
+  };
 
-    const chart_data = {
-      labels: dataset.filter( r => r["vdh_health_district"] == "Blue Ridge").map( r => r['report_date']),
-      datasets: health_districts.map((s,idx) => ({
-        label: s,
-        fill: false,
-        backgroundColor: pal[idx],
-        data: dataset.filter( r=> r.vdh_health_district == s).map( r => r.total_cases_average),
-      })),
-    };
-
-    const chart_config = {
-      type: 'line',
-      data: chart_data,
-      options: {
-        scales: {
-          xAxis: {
-            type: 'time',
-            time: {
-              unit: 'week',
-            }
-          }
-        }
-      }
-    };
-
-    var myChart = new Chart(ctx, chart_config);
-}
+  const x = d3.scaleUtc()
+    .domain(d3.extent(dataset.map( s => s.report_date)))
+    .range([0, width]);
   
-component();
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(dataset.map( s => s.total_cases_daily))])
+    .range([height, 0])
+    .nice();
+
+
+
+  const svg = d3.select("div#figure")
+    .append("div")
+    .classed("svg-container", true) 
+    .append("svg")
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("viewBox", [0,0, width + margin.left + margin.right, height + margin.top + margin.bottom])
+    .classed("svg-content-responsive", true)
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+  svg.append("g")
+    .attr('transform', `translate(0, ${height})`)
+    .call(d3.axisBottom(x));
+
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+  let line = d3.line()
+    .defined(d => !isNaN(d.total_cases_average))
+    .x(d => x(d.report_date))
+    .y(d => y(d.total_cases_average))
+
+  const healthDistricts = ['Blue Ridge', 'Fairfax', 'Virginia Beach', "Central Shenandoah"];
+  const colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(healthDistricts);
+
+  for (const district of healthDistricts) {
+    svg.append("path")
+      .datum(dataset.filter( r => r.vdh_health_district == district))
+      .attr("stroke", colorScale(district))
+      .attr("fill", "none")
+      .attr("d", line);
+
+    svg.append("g")
+      .selectAll("circle")
+      .data(dataset.filter( r => r.vdh_health_district == district))
+      .join("circle")
+      .attr('fill', colorScale(district))
+      .attr('cx', r => x(r.report_date))
+      .attr('cy', r => y(r.total_cases_daily))
+      .attr('r', 1);
+  }
+  healthDistricts.map( (district, index) => {
+    svg.append("text")
+      .attr("x", width * 0.8)
+      .attr("font-size", "8")
+      .attr("y", height * 0.2 + 10 * index)
+      .attr('fill', colorScale(district))
+      .text(district)
+  });
+}
+drawFigure();
