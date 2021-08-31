@@ -41,5 +41,5 @@ vignettes/*.pdf
 *.pdf
 
 /node_modules/
-/data/output.json
+output.json
 /client-dist/

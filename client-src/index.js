@@ -1,11 +1,7 @@
 'use strict';
-import _ from 'lodash';
 import * as d3 from "d3";
-import data from '../data/output.json';
-window.dat = data;
 
-function drawFigure() {
-  const dataset = data;
+function drawFigure(dataset) {
   const width = 600;
   const height = 400;
   const margin = {
@@ -23,8 +19,6 @@ function drawFigure() {
     .domain([0, d3.max(dataset.map( s => s.total_cases_daily))])
     .range([height, 0])
     .nice();
-
-
 
   const svg = d3.select("div#figure")
     .append("div")
@@ -76,4 +70,8 @@ function drawFigure() {
       .text(district)
   });
 }
-drawFigure();
+
+d3.json("/output.json").then( (data) => {
+  drawFigure(data);
+});
+
