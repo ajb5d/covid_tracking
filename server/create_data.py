@@ -4,13 +4,12 @@ import pathlib
 import pandas as pd
 
 
-population_data = pd.read_csv("data/population_data.csv", encoding = "ISO-8859-1")
+population_data = pd.read_csv("../data/population_data.csv", encoding = "ISO-8859-1")
 population_data['FIPS'] = population_data['STATE'].map(lambda x: f"{x:02}") + population_data['COUNTY'].map(lambda x: f"{x:03}")
 population_data['population'] =  population_data['POPESTIMATE2019'] / 100000
 population_data = population_data[['FIPS', 'population']]
 
-#URL = 'https://data.virginia.gov/api/views/bre9-aqqr/rows.csv?accessType=DOWNLOAD'
-URL = 'rows.csv'
+URL = 'https://data.virginia.gov/api/views/bre9-aqqr/rows.csv?accessType=DOWNLOAD'
 covid_data = pd.read_csv(URL, dtype = {'FIPS': 'str'}, parse_dates= ['Report Date'])
 
 covid_data = covid_data.merge(population_data)
@@ -29,4 +28,4 @@ average_data['Case Average'] = (average_data['Total Cases'] - average_data['Tota
 
 json_result = average_data[['VDH Health District', 'Report Date', 'Case Average']].to_json(orient='records')
 
-pathlib.Path('./output.json').write_text(json_result)
+pathlib.Path('../data/output.json').write_text(json_result)

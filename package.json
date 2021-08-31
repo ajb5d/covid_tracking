@@ -1,0 +1,36 @@
+{
+  "name": "covid_tracking",
+  "sideEffects": false,
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack serve --open",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajb5d/covid_tracking.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ajb5d/covid_tracking/issues"
+  },
+  "homepage": "https://github.com/ajb5d/covid_tracking#readme",
+  "devDependencies": {
+    "html-webpack-plugin": "^5.3.2",
+    "live-server": "^1.2.1",
+    "webpack": "^5.51.1",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.0.0"
+  },
+  "dependencies": {
+    "chart.js": "^3.5.1",
+    "chartjs-adapter-date-fns": "^2.0.0",
+    "date-fns": "^2.23.0",
+    "jquery": "^3.6.0",
+    "lodash": "^4.17.21"
+  }
+}
