@@ -21,7 +21,7 @@
   "homepage": "https://github.com/ajb5d/covid_tracking#readme",
   "devDependencies": {
     "html-webpack-plugin": "^5.3.2",
-    "live-server": "^1.2.1",
+    "live-server": "^1.1.0",
     "webpack": "^5.51.1",
     "webpack-cli": "^4.8.0",
     "webpack-dev-server": "^4.0.0"
@@ -29,7 +29,9 @@
   "dependencies": {
     "chart.js": "^3.5.1",
     "chartjs-adapter-date-fns": "^2.0.0",
+    "d3": "^7.0.1",
     "date-fns": "^2.23.0",
+    "google-palette": "^1.1.0",
     "jquery": "^3.6.0",
     "lodash": "^4.17.21"
   }

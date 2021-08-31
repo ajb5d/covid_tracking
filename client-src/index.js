@@ -1,3 +1,5 @@
+'use strict';
+
 import {
   Chart,
   ArcElement,
@@ -54,23 +56,25 @@ Chart.register(
 );
 
 import 'chartjs-adapter-date-fns';
-
-
+import _ from 'lodash';
+import * as d3 from "d3";
 import data from '../data/output.json';
+window.dat = data;
 
 function component() {
     var ctx = "myChart";
     const dataset = data;
-    // 
+    const health_districts = ["Blue Ridge", "Central Shenandoah", "Virginia Beach"];//_.uniq(dataset.map(s => s.vdh_health_district))
+    const pal = d3.schemeTableau10;
 
     const chart_data = {
-      labels: dataset.filter( r => r["VDH Health District"] == "Blue Ridge").map( r => r['Report Date']),
-      datasets: [{
-        label: "Blue Ridge",
-        borderColor: 'rgb(75, 192, 192)',
-        data: dataset.filter( r => r["VDH Health District"] == "Blue Ridge").map( r => r['Case Average']),
+      labels: dataset.filter( r => r["vdh_health_district"] == "Blue Ridge").map( r => r['report_date']),
+      datasets: health_districts.map((s,idx) => ({
+        label: s,
         fill: false,
-      }]
+        backgroundColor: pal[idx],
+        data: dataset.filter( r=> r.vdh_health_district == s).map( r => r.total_cases_average),
+      })),
     };
 
     const chart_config = {
