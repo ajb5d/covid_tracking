@@ -14,7 +14,7 @@ population_data = population_data[['fips', 'population']]
 
 
 URL = 'https://data.virginia.gov/api/views/bre9-aqqr/rows.csv?accessType=DOWNLOAD'
-covid_data = pd.read_csv(URL, dtype = {'FIPS': 'str'}, parse_dates= ['report_date'])
+covid_data = pd.read_csv(URL, dtype = {'FIPS': 'str'}, parse_dates= ['Report Date'])
 covid_data.columns = covid_data.columns.map(lambda x: x.lower().replace(" ", "_"))
 covid_data = covid_data.merge(population_data)
 
