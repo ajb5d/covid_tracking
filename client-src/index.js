@@ -11,12 +11,14 @@ function drawFigure(dataset) {
     bottom: 30,
   };
 
+  const healthDistricts = ['Blue Ridge', 'Fairfax', 'Virginia Beach', "Central Shenandoah"];
+
   const x = d3.scaleUtc()
     .domain(d3.extent(dataset.map( s => s.report_date)))
     .range([0, width]);
   
   const y = d3.scaleLinear()
-    .domain([0, d3.max(dataset.map( s => s.total_cases_daily))])
+    .domain([0, d3.max(dataset.filter(s => healthDistricts.includes(s.vdh_health_district)).map(s => s.total_cases_daily))])
     .range([height, 0])
     .nice();
 
@@ -39,10 +41,11 @@ function drawFigure(dataset) {
 
   let line = d3.line()
     .defined(d => !isNaN(d.total_cases_average))
+    .curve(d3.curveBasis)
     .x(d => x(d.report_date))
     .y(d => y(d.total_cases_average))
 
-  const healthDistricts = ['Blue Ridge', 'Fairfax', 'Virginia Beach', "Central Shenandoah"];
+  
   const colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(healthDistricts);
 
   for (const district of healthDistricts) {
@@ -75,3 +78,29 @@ d3.json("/output.json").then( (data) => {
   drawFigure(data);
 });
 
+function drawMap(mapData) {
+  const svg = d3.select("div#map")
+    .append("div")
+    .classed("svg-container", true) 
+    .append("svg")
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("viewBox", [0, 0, 975, 610])
+    .classed("svg-content-responsive", true)
+
+  let projection = d3.geoEquirectangular().fitSize([975, 610], mapData)
+
+  let geoGenerator = d3.geoPath().projection(projection);
+
+  svg.append('g')
+    .selectAll('path')
+    .data(mapData.features)
+    .join('path')
+    .attr('fill', 'none')
+    .attr('stroke', 'blue')
+    .attr('d', geoGenerator);
+
+}
+
+d3.json("/va_vdh.json").then( (data) => {
+  drawMap(data)
+});
