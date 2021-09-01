@@ -95,12 +95,6 @@ function drawMap(mapData, rateData) {
     .attr("viewBox", [0, 0, 975, 610])
     .classed("svg-content-responsive", true)
 
-  const b = [[-0.090317,-0.038369],[0.054986,0.024383]],
-    width = 975,
-    height = 610,
-    s = 0.95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
-    t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
-
   let projection = d3.geoConicConformal()
     .rotate([78.5,-37.66667])
     .parallels([38.03333,39.2])
@@ -121,11 +115,8 @@ function drawMap(mapData, rateData) {
 
 }
 
-
-
-
 Promise.all([
-  d3.json("/va_vdh.json"),
+  d3.json("/va_health_districts.geojson"),
   d3.json("/pcr_positive_by_hd.json"),
 ]).then( (data) => {
   drawMap(data[0], data[1])
