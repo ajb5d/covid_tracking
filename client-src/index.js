@@ -75,10 +75,18 @@ function drawFigure(dataset) {
 }
 
 d3.json("/output.json").then( (data) => {
+  console.log(`${data.length} records`);
+  window.dataSet = data;
   drawFigure(data);
 });
 
-function drawMap(mapData) {
+function drawMap(mapData, rateData) {
+  const rateMap = rateData.reduce((dict, element) => (dict[element.vdh_hd] = element.pcr_rate, dict), new Map());
+
+  const color = d3.scaleLinear()
+    .domain([0, 0.25])
+    .range(['white', 'red'])
+
   const svg = d3.select("div#map")
     .append("div")
     .classed("svg-container", true) 
@@ -87,20 +95,38 @@ function drawMap(mapData) {
     .attr("viewBox", [0, 0, 975, 610])
     .classed("svg-content-responsive", true)
 
-  let projection = d3.geoEquirectangular().fitSize([975, 610], mapData)
+  const b = [[-0.090317,-0.038369],[0.054986,0.024383]],
+    width = 975,
+    height = 610,
+    s = 0.95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+    t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+
+  let projection = d3.geoConicConformal()
+    .rotate([78.5,-37.66667])
+    .parallels([38.03333,39.2])
+    .fitSize([975, 610], mapData);
 
   let geoGenerator = d3.geoPath().projection(projection);
+  let colorGenerator = r => {
+    return color(rateMap[r.properties.vdh_hd]);
+  };
 
   svg.append('g')
     .selectAll('path')
     .data(mapData.features)
     .join('path')
-    .attr('fill', 'none')
-    .attr('stroke', 'blue')
+    .attr('fill', colorGenerator)
+    .attr('stroke', colorGenerator)
     .attr('d', geoGenerator);
 
 }
 
-d3.json("/va_vdh.json").then( (data) => {
-  drawMap(data)
+
+
+
+Promise.all([
+  d3.json("/va_vdh.json"),
+  d3.json("/pcr_positive_by_hd.json"),
+]).then( (data) => {
+  drawMap(data[0], data[1])
 });

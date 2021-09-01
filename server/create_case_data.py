@@ -6,7 +6,6 @@ import pandas as pd
 ## This is the averaging window in days for the moving case average
 SHIFT_COUNT = 7
 
-
 population_data = pd.read_csv("../data/population_data.csv", encoding = "ISO-8859-1")
 population_data['fips'] = population_data['STATE'].map(lambda x: f"{x:02}") + population_data['COUNTY'].map(lambda x: f"{x:03}")
 population_data['population'] =  population_data['POPESTIMATE2019'] / 100000
@@ -34,4 +33,4 @@ average_data['total_cases_daily'] = (average_data['total_cases'] - average_data[
 
 json_result = average_data[['vdh_health_district', 'report_date', 'total_cases_average', 'total_cases_daily']].to_json(orient='records')
 
-pathlib.Path('../data/output.json').write_text(json_result)
+pathlib.Path('../public/rates_by_hd.json').write_text(json_result)
