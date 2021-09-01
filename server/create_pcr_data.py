@@ -27,7 +27,7 @@ threshold_date = max_date - np.timedelta64(7, 'D')
 
 summary_data = covid_data[covid_data.lab_report_date >= threshold_date].groupby('health_district').agg(sum)
 summary_data['pcr_rate'] = summary_data['number_of_positive_pcr_testing_encounters'] / summary_data['number_of_pcr_testing_encounters'] 
-summary_data['vdh_hd'] = summary_data.index.map(lambda x: FIX_KEYS[x] if x in FIX_KEYS else x)
+summary_data.index = summary_data.index.map(lambda x: FIX_KEYS[x] if x in FIX_KEYS else x)
 
-json_result = summary_data[['vdh_hd', 'pcr_rate']].to_json(orient='records')
+json_result = summary_data.pcr_rate.to_json()
 pathlib.Path('../public/pcr_positive_by_hd.json').write_text(json_result)

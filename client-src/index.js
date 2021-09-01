@@ -74,14 +74,11 @@ function drawFigure(dataset) {
   });
 }
 
-d3.json("/output.json").then( (data) => {
-  console.log(`${data.length} records`);
-  window.dataSet = data;
+d3.json("/rates_by_hd.json").then( (data) => {
   drawFigure(data);
 });
 
-function drawMap(mapData, rateData) {
-  const rateMap = rateData.reduce((dict, element) => (dict[element.vdh_hd] = element.pcr_rate, dict), new Map());
+function drawHDRateMap(mapData, rateData) {
 
   const color = d3.scaleLinear()
     .domain([0, 0.25])
@@ -102,7 +99,7 @@ function drawMap(mapData, rateData) {
 
   let geoGenerator = d3.geoPath().projection(projection);
   let colorGenerator = r => {
-    return color(rateMap[r.properties.vdh_hd]);
+    return color(rateData[r.properties.vdh_hd] ?? 0);
   };
 
   svg.append('g')
@@ -110,7 +107,7 @@ function drawMap(mapData, rateData) {
     .data(mapData.features)
     .join('path')
     .attr('fill', colorGenerator)
-    .attr('stroke', colorGenerator)
+    .attr('stroke', 'black')
     .attr('d', geoGenerator);
 
 }
@@ -119,5 +116,43 @@ Promise.all([
   d3.json("/va_health_districts.geojson"),
   d3.json("/pcr_positive_by_hd.json"),
 ]).then( (data) => {
-  drawMap(data[0], data[1])
+  drawHDRateMap(data[0], data[1])
 });
+
+function drawCountyRates(mapData) {  
+  // const color = d3.scaleLinear()
+  //   .domain([0, 0.25])
+  //   .range(['white', 'red'])
+
+  const svg = d3.select("div#countyMap")
+    .append("div")
+    .classed("svg-container", true) 
+    .append("svg")
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("viewBox", [0, 0, 975, 610])
+    .classed("svg-content-responsive", true)
+
+  let projection = d3.geoConicConformal()
+    .rotate([78.5,-37.66667])
+    .parallels([38.03333,39.2])
+    .fitSize([975, 610], mapData);
+
+  let geoGenerator = d3.geoPath().projection(projection);
+  // let colorGenerator = r => {
+  //   return color(rateMap[r.properties.vdh_hd]);
+  // };
+
+  svg.append('g')
+    .selectAll('path')
+    .data(mapData.features)
+    .join('path')
+    .attr('fill', 'none')
+    .attr('stroke', 'black')
+    .attr('d', geoGenerator);
+}
+
+// Promise.all([
+//   d3.json("/va_county_boundaries.geojson"),
+// ]).then( (data) => {
+//   drawCountyRates(data[0])
+// });
