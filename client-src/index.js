@@ -151,8 +151,8 @@ function drawCountyRates(mapData) {
     .attr('d', geoGenerator);
 }
 
-// Promise.all([
-//   d3.json("/va_county_boundaries.geojson"),
-// ]).then( (data) => {
-//   drawCountyRates(data[0])
-// });
+Promise.all([
+  d3.json("/va_counties.geojson"),
+]).then( (data) => {
+  drawCountyRates(data[0])
+});
