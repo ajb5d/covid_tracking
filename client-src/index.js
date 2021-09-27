@@ -74,7 +74,7 @@ function drawFigure(dataset) {
   });
 }
 
-d3.json("/rates_by_hd.json").then( (data) => {
+d3.json("rates_by_hd.json").then( (data) => {
   drawFigure(data);
 });
 
@@ -113,8 +113,8 @@ function drawHDRateMap(mapData, rateData) {
 }
 
 Promise.all([
-  d3.json("/va_health_districts.geojson"),
-  d3.json("/pcr_positive_by_hd.json"),
+  d3.json("va_health_districts.geojson"),
+  d3.json("pcr_positive_by_hd.json"),
 ]).then( (data) => {
   drawHDRateMap(data[0], data[1])
 });
@@ -152,7 +152,7 @@ function drawCountyRates(mapData) {
 }
 
 Promise.all([
-  d3.json("/va_counties.geojson"),
+  d3.json("va_counties.geojson"),
 ]).then( (data) => {
   drawCountyRates(data[0])
 });
