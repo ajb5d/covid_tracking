@@ -2,6 +2,14 @@
 import * as d3 from "d3";
 
 function drawFigure(dataset) {
+
+  dataset.forEach(d => {
+    d['dates'] = d['dates'].map(e => new Date(e));
+  });
+
+  const healthDistricts = ['Blue Ridge', 'Fairfax', 'Virginia Beach', "Central Shenandoah"];
+  const plotData = dataset.filter(e => healthDistricts.includes(e.health_district));
+
   const width = 600;
   const height = 400;
   const margin = {
@@ -11,14 +19,13 @@ function drawFigure(dataset) {
     bottom: 30,
   };
 
-  const healthDistricts = ['Blue Ridge', 'Fairfax', 'Virginia Beach', "Central Shenandoah"];
 
   const x = d3.scaleUtc()
-    .domain(d3.extent(dataset.map( s => s.report_date)))
+    .domain(d3.extent(plotData.flatMap(e => e.dates.slice(0,90))))
     .range([0, width]);
   
   const y = d3.scaleLinear()
-    .domain([0, d3.max(dataset.filter(s => healthDistricts.includes(s.vdh_health_district)).map(s => s.total_cases_daily))])
+    .domain([0, d3.max(plotData.flatMap(e => e.newCases))])
     .range([height, 0])
     .nice();
 
@@ -40,28 +47,30 @@ function drawFigure(dataset) {
     .call(d3.axisLeft(y));
 
   let line = d3.line()
-    .defined(d => !isNaN(d.total_cases_average))
     .curve(d3.curveBasis)
-    .x(d => x(d.report_date))
-    .y(d => y(d.total_cases_average))
+    .x(d => x(d[0]))
+    .y(d => y(d[1]))
 
   
   const colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(healthDistricts);
 
   for (const district of healthDistricts) {
+    const hdData = plotData.find(r => r.health_district == district);
+
+    console.log(d3.zip(hdData.dates, hdData.weeklyNewCaseAvg));
     svg.append("path")
-      .datum(dataset.filter( r => r.vdh_health_district == district))
+      .datum(d3.zip(hdData.dates, hdData.weeklyNewCaseAvg))
       .attr("stroke", colorScale(district))
       .attr("fill", "none")
       .attr("d", line);
 
     svg.append("g")
       .selectAll("circle")
-      .data(dataset.filter( r => r.vdh_health_district == district))
+      .data(d3.zip(hdData.dates, hdData.newCases.slice(0,90)))
       .join("circle")
       .attr('fill', colorScale(district))
-      .attr('cx', r => x(r.report_date))
-      .attr('cy', r => y(r.total_cases_daily))
+      .attr('cx', r => x(r[0]))
+      .attr('cy', r => y(r[1]))
       .attr('r', 1);
   }
   healthDistricts.map( (district, index) => {
@@ -74,7 +83,7 @@ function drawFigure(dataset) {
   });
 }
 
-d3.json("rates_by_hd.json").then( (data) => {
+d3.json("rates_by_hd.json").then((data) => {
   drawFigure(data);
 });
 
