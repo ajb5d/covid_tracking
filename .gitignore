@@ -43,4 +43,4 @@ vignettes/*.pdf
 /node_modules/
 /public/*.json
 /client-dist/
-
+.DS_store
