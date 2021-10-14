@@ -3,7 +3,8 @@
 
 import * as path from 'path';
 import fetch from 'node-fetch';
-import { stat, readFile, writeFile } from 'fs/promises'
+import { stat, readFile, writeFile } from 'fs/promises';
+import { inspect } from 'util';
 import * as d3 from 'd3';
 import url from 'url';
 
@@ -720,6 +721,20 @@ function summariseHealthDepartmentData(data) {
     return newData.map(d => d[1]);
 };
 
+function summariseCountyData(data) {
+    const prettyFormat = d3.format(".1f");
+
+    const groupedData = d3.flatRollup(data, records => {
+        const runningTotals = records.map(d => d.total_cases).reverse();
+        const population = fips_map[records[0].fips].population
+        return d3.range(0, runningTotals.length - 8)
+                .map(idx => (runningTotals[idx] - runningTotals[idx + 7]) / (7 * population))
+                .map(d => +prettyFormat(d))[0];
+    }, d => d.fips);
+
+    return groupedData;
+}
+
 callIfTargetStale(
     getFileUpdateTime(pathForTarget("rates_by_hd.json")),
     getRemoteUpdate("https://data.virginia.gov/api/views/metadata/v1/bre9-aqqr"),
@@ -731,19 +746,38 @@ callIfTargetStale(
                 r.total_cases = +r.total_cases;
                 return r;
             }))
-            .then(summariseHealthDepartmentData)
             .then(d => {
-                writeFile('rates_by_hd.json', JSON.stringify(d));
+                new Promise((resolve, reject) => {
+                    resolve(summariseCountyData(d));
+                }).then(d => {
+                    writeFile('rates_by_county.json', JSON.stringify(d))
+                });
+        
+                new Promise((resolve, reject) => {
+                    resolve(summariseHealthDepartmentData(d));
+                }).then(d => {
+                    writeFile('rates_by_hd.json', JSON.stringify(d))
+                });
             });
-});
+    });
 
 // readFile('data.json')
-//     .then(d => JSON.parse(d).map(r => {
+//     .then(d => JSON.parse(d.toString()))
+//     .then(d => d.map(r => {
 //         r.report_date = new Date(r.report_date);
 //         r.total_cases = +r.total_cases;
 //         return r;
 //     }))
-//     .then(summariseHealthDepartmentData)
 //     .then(d => {
-//         writeFile('rates_by_hd.json', JSON.stringify(d));
+//         new Promise((resolve, reject) => {
+//             resolve(summariseCountyData(d));
+//         }).then(d => {
+//             writeFile('rates_by_county.json', JSON.stringify(d))
+//         });
+
+//         new Promise((resolve, reject) => {
+//             resolve(summariseHealthDepartmentData(d));
+//         }).then(d => {
+//             writeFile('rates_by_hd.json', JSON.stringify(d))
+//         });
 //     });
