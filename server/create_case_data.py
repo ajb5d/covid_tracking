@@ -9,7 +9,7 @@ SHIFT_COUNT = 7
 population_data = pd.read_csv("../data/population_data.csv", encoding = "ISO-8859-1")
 population_data['fips'] = population_data['STATE'].map(lambda x: f"{x:02}") + population_data['COUNTY'].map(lambda x: f"{x:03}")
 population_data['population'] =  population_data['POPESTIMATE2019'] / 100000
-population_data = population_data[['fips', 'population']]
+population_data = population_data[population_data.STATE == 51][['fips', 'population']]
 
 
 URL = 'https://data.virginia.gov/api/views/bre9-aqqr/rows.csv?accessType=DOWNLOAD'

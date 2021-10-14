@@ -2,12 +2,11 @@
 import * as d3 from "d3";
 
 function drawFigure(dataset) {
-
   dataset.forEach(d => {
     d['dates'] = d['dates'].map(e => new Date(e));
   });
 
-  const healthDistricts = ['Blue Ridge', 'Fairfax', 'Virginia Beach', "Central Shenandoah"];
+  const healthDistricts = ['Blue Ridge', 'Virginia Beach', "Central Shenandoah"];
   const plotData = dataset.filter(e => healthDistricts.includes(e.health_district));
 
   const width = 600;
@@ -19,9 +18,10 @@ function drawFigure(dataset) {
     bottom: 30,
   };
 
+  const dateLength = dataset[0].weeklyNewCaseAvg.length;
 
   const x = d3.scaleUtc()
-    .domain(d3.extent(plotData.flatMap(e => e.dates.slice(0,90))))
+    .domain(d3.extent(plotData.flatMap(e => e.dates.slice(0,dateLength))))
     .range([0, width]);
   
   const y = d3.scaleLinear()
@@ -51,13 +51,11 @@ function drawFigure(dataset) {
     .x(d => x(d[0]))
     .y(d => y(d[1]))
 
-  
   const colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(healthDistricts);
 
   for (const district of healthDistricts) {
     const hdData = plotData.find(r => r.health_district == district);
 
-    console.log(d3.zip(hdData.dates, hdData.weeklyNewCaseAvg));
     svg.append("path")
       .datum(d3.zip(hdData.dates, hdData.weeklyNewCaseAvg))
       .attr("stroke", colorScale(district))
@@ -66,7 +64,7 @@ function drawFigure(dataset) {
 
     svg.append("g")
       .selectAll("circle")
-      .data(d3.zip(hdData.dates, hdData.newCases.slice(0,90)))
+      .data(d3.zip(hdData.dates, hdData.newCases.slice(0, dateLength)))
       .join("circle")
       .attr('fill', colorScale(district))
       .attr('cx', r => x(r[0]))
@@ -75,8 +73,8 @@ function drawFigure(dataset) {
   }
   healthDistricts.map( (district, index) => {
     svg.append("text")
+      .classed('legend-text', true)
       .attr("x", width * 0.8)
-      .attr("font-size", "8")
       .attr("y", height * 0.2 + 10 * index)
       .attr('fill', colorScale(district))
       .text(district)
@@ -88,10 +86,9 @@ d3.json("rates_by_hd.json").then((data) => {
 });
 
 function drawHDRateMap(mapData, rateData) {
-
-  const color = d3.scaleLinear()
-    .domain([0, 0.25])
-    .range(['white', 'red'])
+  const maxVal = d3.max(Object.keys(rateData).filter(d => d != 'Out Of State').map(d => rateData[d])) + 0.01;
+  const color = d3.scaleSequential(d3.interpolateViridis)
+    .domain([0, maxVal]);
 
   const svg = d3.select("div#map")
     .append("div")
@@ -118,6 +115,34 @@ function drawHDRateMap(mapData, rateData) {
     .attr('fill', colorGenerator)
     .attr('stroke', 'black')
     .attr('d', geoGenerator);
+
+  const figureData = d3.range(0, maxVal, maxVal / 10)
+    .map((i,v) => ({
+      step: i, 
+      offset: v,
+      color: color(i),
+    }));
+
+  const pctFmt = d3.format("0.1%")
+
+  svg.append('g')
+    .selectAll('rect')
+    .data(figureData)
+    .join('rect')
+    .attr('fill', d => d.color)
+    .attr('width', 31)
+    .attr('height', 30)
+    .attr('x', d => 30 + 30 * d.offset)
+    .attr('y', 30);
+
+  svg.append('g')
+    .selectAll('text')
+    .data(figureData)
+    .join('text')
+    .classed('map-legend-text', true)
+    .attr('x', d => 45 + 30 * d.offset)
+    .attr('y', 27)
+    .text(d => pctFmt(d.step));
 
 }
 
