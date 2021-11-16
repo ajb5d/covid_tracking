@@ -153,10 +153,10 @@ Promise.all([
   drawHDRateMap(data[0], data[1])
 });
 
-function drawCountyRates(mapData) {  
-  // const color = d3.scaleLinear()
-  //   .domain([0, 0.25])
-  //   .range(['white', 'red'])
+function drawCountyRates(mapData, rateData) {  
+  const color = d3.scaleLinear()
+    .domain([0, d3.max(rateData.map( d => d[1]))])
+    .range(['white', 'red'])
 
   const svg = d3.select("div#countyMap")
     .append("div")
@@ -172,21 +172,25 @@ function drawCountyRates(mapData) {
     .fitSize([975, 610], mapData);
 
   let geoGenerator = d3.geoPath().projection(projection);
-  // let colorGenerator = r => {
-  //   return color(rateMap[r.properties.vdh_hd]);
-  // };
+  let colorGenerator = r => {
+    const target = `51${r.properties.COUNTY}`
+    const result = rateData.find(x => x[0] == target) ?? [0,0];
+    console.log(color(result[1]));
+    return color(result[1]);
+  };
 
   svg.append('g')
     .selectAll('path')
     .data(mapData.features)
     .join('path')
-    .attr('fill', 'none')
+    .attr('fill', colorGenerator)
     .attr('stroke', 'black')
     .attr('d', geoGenerator);
 }
 
 Promise.all([
   d3.json("va_counties.geojson"),
+  d3.json('rates_by_county.json')
 ]).then( (data) => {
-  drawCountyRates(data[0])
+  drawCountyRates(data[0], data[1])
 });

@@ -660,7 +660,43 @@ const fips_map = {
     }
 };
 
-const health_district_populations = new Map([["Eastern Shore", 0.44026], ["Blue Ridge", 2.56206], ["Alleghany", 1.78435], ["Piedmont", 1.02335], ["Central Virginia", 2.6356599999999997], ["Arlington", 2.36842], ["Central Shenandoah", 3.0091800000000006], ["Mount Rogers", 1.87258], ["Southside", 0.80729], ["Cumberland Plateau", 1.0250299999999999], ["Rappahannock", 3.75694], ["Chickahominy", 1.6157299999999999], ["Chesterfield", 3.9982400000000005], ["Lord Fairfax", 2.39692], ["Rappahannock Rapidan", 1.81509], ["Crater", 1.55035], ["Three Rivers", 1.41626], ["Fairfax", 11.86168], ["New River", 1.8328], ["West Piedmont", 1.36761], ["Henrico", 3.30818], ["Western Tidewater", 1.5481500000000001], ["Peninsula", 3.51253], ["Lenowisco", 0.86353], ["Loudoun", 4.13538], ["Pittsylvania-Danville", 1.0039799999999999], ["Prince William", 5.2889800000000005], ["Alexandria", 1.59428], ["Chesapeake", 2.44835], ["Hampton", 1.3451], ["Norfolk", 2.42742], ["Portsmouth", 0.94398], ["Richmond", 2.30436], ["Roanoke", 0.99143], ["Virginia Beach", 4.49974]])
+const health_district_populations = new Map([
+  ["Eastern Shore", 0.44026],
+  ["Blue Ridge", 2.56206],
+  ["Alleghany", 1.78435],
+  ["Piedmont", 1.02335],
+  ["Central Virginia", 2.6356599999999997],
+  ["Arlington", 2.36842],
+  ["Central Shenandoah", 3.0091800000000006],
+  ["Mount Rogers", 1.87258],
+  ["Southside", 0.80729],
+  ["Cumberland Plateau", 1.0250299999999999],
+  ["Rappahannock", 3.75694],
+  ["Chickahominy", 1.6157299999999999],
+  ["Chesterfield", 3.9982400000000005],
+  ["Lord Fairfax", 2.39692],
+  ["Rappahannock Rapidan", 1.81509],
+  ["Crater", 1.55035],
+  ["Three Rivers", 1.41626],
+  ["Fairfax", 11.86168],
+  ["New River", 1.8328],
+  ["West Piedmont", 1.36761],
+  ["Henrico", 3.30818],
+  ["Western Tidewater", 1.5481500000000001],
+  ["Peninsula", 3.51253],
+  ["Lenowisco", 0.86353],
+  ["Loudoun", 4.13538],
+  ["Pittsylvania-Danville", 1.0039799999999999],
+  ["Prince William", 5.2889800000000005],
+  ["Alexandria", 1.59428],
+  ["Chesapeake", 2.44835],
+  ["Hampton", 1.3451],
+  ["Norfolk", 2.42742],
+  ["Portsmouth", 0.94398],
+  ["Richmond", 2.30436],
+  ["Roanoke", 0.99143],
+  ["Virginia Beach", 4.49974],
+]);
 
 async function getFileUpdateTime(path) {
     return stat(path)
